@@ -26,12 +26,12 @@ def solve(drivers, nodes, adjMtrxDist, adjMtrxTimes, nodeWeights, deliveryManWei
 	drivers = min(drivers, nodes)
 	
 	# if n == 5:
-	startingPoints = random.sample(range(1, nodes+1), drivers)
+	startingPoints = random.sample(range(2, nodes+1), drivers)
 	# startingPoints = [54, 81, 86, 79]
 	
 	
 	points = []
-	for i in range(1, nodes+1):
+	for i in range(2, nodes+1):
 		if (i in startingPoints):
 			continue
 		points.append(i)
@@ -96,7 +96,7 @@ def solve(drivers, nodes, adjMtrxDist, adjMtrxTimes, nodeWeights, deliveryManWei
 	for i in clustersNodes:
 		nodesDone += len(i)
 
-	print(nodesDone)
+	print("nodesDone = ", nodesDone)
 
 	for i in newPoints:
 		mx = float('inf')
@@ -154,6 +154,25 @@ def solve(drivers, nodes, adjMtrxDist, adjMtrxTimes, nodeWeights, deliveryManWei
 				path = tmp[1]
 				menCost = tmp[0]
 			# path = tmp[1]
+		ans[i] = path
+		# print("path before", path)
+		assert(len(path) > 1)
+		if (len(path) == 2): 
+			assert(path[0] == path[1])
+			ans[i] = [1] + path[0] + [1]
+			# print("path after", path)
+			continue
+		
+		mnDistDiff = float('inf')
+		mnIdx = -1
+		for j in range(len(path)-1):
+			distDiff = -adjMtrxDist[path[j]][path[j+1]] + adjMtrxDist[path[j]][1] + adjMtrxDist[1][path[j+1]]
+			if (distDiff < mnDistDiff):
+				mnDistDiff = distDiff
+				mnIdx = j
+		assert(idx != -1)
+		path = [1] + path[mnIdx+1:] + path[1:mnIdx+1] + [1]
+		# print("path after", path)
 		ans[i] = path
 	# print("my length", len(ans))
 
