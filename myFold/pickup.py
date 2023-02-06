@@ -20,7 +20,7 @@ import copy
 # return 
 # locations, cost, adjMatrixTime, adjMatri, nodeWeights, nodes
 
-def pickup(drivers, locations, nodeWeights, adjMtrxDist, adjMtrxTimes, nodes, newNode, distances, points):
+def pickup(drivers, locations, nodeWeights, adjMtrxDist, adjMtrxTimes, nodes, newNode, distances, times, points):
 	
 	deliveryManWeight = 100
 	graph = {}
@@ -40,6 +40,10 @@ def pickup(drivers, locations, nodeWeights, adjMtrxDist, adjMtrxTimes, nodes, ne
 	for i in range(1, nodes+1):
 		# print(type(adjMtrxDist[i]))
 		adjMtrxDist[i].append(distances[i])
+
+	# for i in range(1, nodes+1):
+	# 	# print(type(adjMtrxDist[i]))
+	# 	adjMtrxDist[i].append(times[i])
 
 	allLocations = set()
 	allLocations.add(nodes)
@@ -154,4 +158,4 @@ def pickup(drivers, locations, nodeWeights, adjMtrxDist, adjMtrxTimes, nodes, ne
 	# print(ans)
 	# print(points)
 
-	return ans,totalCost, adjMtrxDist, nodeWeights, nodes, points
+	return ans,totalCost, adjMtrxDist, adjMtrxTimes, nodeWeights, nodes, points

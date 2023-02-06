@@ -8,15 +8,15 @@ from pickup import pickup
 import copy
 
 
-f = open("exOut.in", "r")
+f = open("moreLocations.in", "r")
 
 n = int(f.readline())
 m = int(f.readline())
 
 print("solving part done")
 # let hub be location 1
-times = [[0 for i in range(m+1)] for j in range(m+1)]
-# print(len(times))
+adjMtrxDist = [[0 for i in range(m+1)] for j in range(m+1)]
+# print(len(adjMtrxDist))
 
 def distance(x1, y1, x2, y2):
     return ((x1 - x2) ** 2 + (y1 - y2) ** 2) ** 0.5
@@ -36,12 +36,12 @@ pos[0] = (0,0)
 for i in range(m):
     pos[points[i][0]] = (points[i][1], points[i][2])
     for j in range(i+1, m):
-        times[int(points[i][0])][int(points[j][0])] =  distance(points[i][1], points[i][2], points[j][1], points[j][2])
-        times[int(points[j][0])][int(points[i][0])] =  distance(points[i][1], points[i][2], points[j][1], points[j][2])
+        adjMtrxDist[int(points[i][0])][int(points[j][0])] =  distance(points[i][1], points[i][2], points[j][1], points[j][2])
+        adjMtrxDist[int(points[j][0])][int(points[i][0])] =  distance(points[i][1], points[i][2], points[j][1], points[j][2])
 
 
 
-network = nx.from_numpy_array(np.matrix(times))
+network = nx.from_numpy_array(np.matrix(adjMtrxDist))
 
 # then get the adjacency matrix (in sparse form)
 matrix = nx.to_scipy_sparse_array(network)
@@ -61,7 +61,7 @@ fig.suptitle("Points")
 
 # n - number of drivers
 # m - number of locations
-# times - (m + 1)* ( m +1 ) matrix - distance matrix 10000
+# adjMtrxDist - (m + 1)* ( m +1 ) matrix - distance matrix 10000
 # location 1 is the hub
 
 """
@@ -76,11 +76,11 @@ fig.suptitle("Points")
 
 # return a map -> (location, drivers)
 # map of driver to path
-locations, totalCost = solve(n, m, times, {},nodeWeights, deliveryManWeight, 0)
+locations, totalCost = solve(n, m, adjMtrxDist, {},nodeWeights, deliveryManWeight, 0)
 men = totalCost
 
-for i in range(20):
-    temp, temp1 = solve(n, m, times, {},nodeWeights, deliveryManWeight, i%10)
+for i in range(50):
+    temp, temp1 = solve(n, m, adjMtrxDist, {},nodeWeights, deliveryManWeight, i%10)
     print(temp1)
     if(temp1 < men):
         totalCost = temp1
@@ -104,7 +104,7 @@ distances[m+1] = 0
 
 oriLocations = copy.deepcopy(locations)
 print(oriLocations)
-locations, totalCost, times, nodeWeights, m, points = pickup(n, locations, nodeWeights, times, {}, m, newPoint, distances, points)
+locations, totalCost, adjMtrxDist, adjMtrxTimes, nodeWeights, m, points = pickup(n, locations, nodeWeights, adjMtrxDist, {}, m, newPoint, distances, {}, points)
 men = totalCost
 
 # ix = -1
@@ -118,6 +118,8 @@ print(locations)
 
 X = []
 Y = []
+X1 = []
+Y1 = []
 
 for i in range(n):
     X.append([])
@@ -125,16 +127,34 @@ for i in range(n):
 
 # print(points)
 # exit()
+
+for p in range(1, m+1):
+   X1.append(points[p-1][1])
+   Y1.append(points[p-1][2])
+
 for i in range(n):
     for p in locations[i]:
-
        X[i].append(points[p-1][1])
        Y[i].append(points[p-1][2])
        
 
 # print(locations)
+# ax.scatter(X1, Y1, color = 'black')
 colors = ['blue', 'red', 'yellow', 'green', 'purple']
 for i in range (n):
-    ax.scatter(X[i], Y[i], color = colors[i])
+    ax.scatter(X[i], Y[i])
 
+# plt.show()
+# plt.scatter(X1, Y1, color = 'black')
+
+for i in locations.keys():
+    # ax.arrow(i)
+    print("here")
+    tmp = locations[i]
+    # for j in range(1, len(tmp)):
+    #     plt.arrow(points[tmp[j-1]-1][1], points[tmp[j-1]-1][2], points[tmp[j]-1][1] - points[tmp[j-1]-1][1], points[tmp[j]-1][2] - points[tmp[j-1]-1][2])
+    
+    plt.scatter(X[i], Y[i])
+   
 plt.show()
+
