@@ -78,11 +78,13 @@ fig.suptitle("Points")
 
 # return a map -> (location, drivers)
 # map of driver to path
-locations, totalCost = solve(n, m, adjMtrxDist, {},nodeWeights, deliveryManWeight, 0)
-men = totalCost
+men = float('inf')
 
+maxNodesInCluster = 20
+mxPossibleIncludedNodes = min(n * maxNodesInCluster, m)
+p = 1
 for i in range(1):
-	temp, temp1 = solve(n, m, adjMtrxDist, {},nodeWeights, deliveryManWeight, i%10)
+	temp, temp1, doneNodes = solve(n, m, adjMtrxDist, {}, nodeWeights, deliveryManWeight, i%10, p, int(1.75(maxNodesInCluster-1)))
 	print(temp1)
 	if(temp1 < men):
 		totalCost = temp1
@@ -110,6 +112,8 @@ for i in points:
 
 distances[m+1] = 0
 
+# -----------------
+
 oriLocations = copy.deepcopy(locations)
 print("oriLocations", oriLocations)
 locations, totalCost, adjMtrxDist, adjMtrxTimes, nodeWeights, m, points = pickup(n, locations, nodeWeights, adjMtrxDist, {}, m, newPoint, distances, {}, points)
@@ -125,14 +129,19 @@ for i in oriLocations:
 assert(ix != -1)
 
 idx = -1
-try:
-	idx = locations.index(oriLocations[ix][0])
-except:
-	myVeryPersonalVariable = None
-	
-if (idx != -1):
-	locations[ix] = oriLocations[ix][idx:] + oriLocations[ix][1:idx]
+mnVal = float('inf')
+for i in range(len(oriLocations[ix])-1):
+	x = oriLocations[ix][i]
+	y = oriLocations[ix][i+1]
+	val = -adjMtrxDist[x][y] + adjMtrxDist[x][m] + adjMtrxDist[m][y]
+	if (val < mnVal):
+		mnVal = val
+		idx = i
 
+assert(idx != -1)
+locations[ix] = oriLocations[ix][:idx+1] + [m] + oriLocations[idx+1:] 
+	
+# ------------------------
 
 print("locations", locations)
 
