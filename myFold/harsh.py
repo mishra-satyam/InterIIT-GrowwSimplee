@@ -138,16 +138,39 @@ def find_loc(n, m, node_travel_distance, node_travel_time, node_weights, deliver
 		if cost < best_cost:
 			best_locations = locations
 			best_cost = cost
+	for d in best_locations:
+		idx = -1
+		if (1 in best_locations[d]):
+			idx = best_locations[d].index(1)
+			best_locations[d] = best_locations[d][idx:] + best_locations[d][:idx] + [1]
+		else :
+			mnVal = float('inf')
+			mnIdx = -1
+			for i in range(len(best_locations[d])-1):
+				x = best_locations[d][i]
+				y = best_locations[d][i+1]
+				val = -1 * node_travel_distance[x][y] + node_travel_distance[x][1] + node_travel_distance[1][y]
+				if (val< mnVal):
+					mnVal = val
+					mnIdx = i
+			assert(mnIdx != -1)
+			best_locations[d] = [1] + best_locations[d][mnIdx+1:] + best_locations[d][:mnIdx+1] + [1]
 
+	# print("B", best_locations)
 	return best_locations, best_cost
 
+for i in range(1, len(adjMtrxDist)):
+	for j in range(1, len(adjMtrxDist[i])):
+		if adjMtrxDist[i][j] != 0:
+			node_travel_distance[i][j] = 1 / adjMtrxDist[i][j]
 
-for i in range(m):
-    for j in range(i+1, m):
-        node_travel_distance[int(points[i][0])][int(
-            points[j][0])] = 1 / adjMtrxDist[int(points[i][0])][int(points[j][0])]
-        node_travel_distance[int(points[j][0])][int(
-            points[i][0])] = 1 / adjMtrxDist[int(points[j][0])][int(points[i][0])]
+print("N", node_travel_distance)
+# for i in range(m):
+#     for j in range(i+1, m):
+#         node_travel_distance[int(points[i][0])][int(
+#             points[j][0])] = 1 / adjMtrxDist[int(points[i][0])][int(points[j][0])]
+#         node_travel_distance[int(points[j][0])][int(
+#             points[i][0])] = 1 / adjMtrxDist[int(points[j][0])][int(points[i][0])]
 
 r_locations, r_cost = find_loc(
 	n, m, node_travel_distance, node_travel_time, nodeWeights, deliveryManWeight, pos)
@@ -201,8 +224,8 @@ for x in locations:
 print("loc lengths ends")
 
 
-for i in locations:
-	locations[i] = locations[i][5:]
+# for i in locations:
+# 	locations[i] = locations[i][5:]
 # print(locations)
 
 newPoint = [1100, 1100, 1]
@@ -217,7 +240,7 @@ distances[m+1] = 0
 
 oriLocations = copy.deepcopy(locations)
 print("oriLocations", oriLocations)
-locations, totalCost, adjMtrxDist, adjMtrxTimes, nodeWeights, m, points = pickup(n, locations, nodeWeights, adjMtrxDist, {}, m, newPoint, distances, {}, points)
+# locations, totalCost, adjMtrxDist, adjMtrxTimes, nodeWeights, m, points = pickup(n, locations, nodeWeights, adjMtrxDist, {}, m, newPoint, distances, {}, points)
 men = totalCost
 
 ix = -1
