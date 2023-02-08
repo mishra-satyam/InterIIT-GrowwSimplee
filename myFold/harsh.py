@@ -6,6 +6,9 @@ from matplotlib import pyplot as plt
 from main import solve
 from pickup import pickup
 import copy
+from func_rudr import *
+from markov_rudr import *
+from rudr import *
 
 
 f = open("moreLocations.in", "r")
@@ -16,6 +19,8 @@ m = int(f.readline())
 print("solving part done")
 # let hub be location 1
 adjMtrxDist = [[0 for i in range(m+1)] for j in range(m+1)]
+node_travel_time = [[0 for i in range(m+1)] for j in range(m+1)]
+node_travel_distance = [[0 for i in range(m+1)] for j in range(m+1)]
 # print(len(adjMtrxDist))
 
 def distance(x1, y1, x2, y2):
@@ -28,6 +33,7 @@ nodeWeights = {}
 for i in range(m):
 	arr = list(map(float,f.readline().split()))
 	arr.append(1)
+	arr[3] = 1
 	points.append(arr)
 	nodeWeights[arr[0]] = arr[-1]
 
@@ -39,8 +45,22 @@ for i in range(m):
 		adjMtrxDist[int(points[i][0])][int(points[j][0])] =  distance(points[i][1], points[i][2], points[j][1], points[j][2])
 		adjMtrxDist[int(points[j][0])][int(points[i][0])] =  distance(points[i][1], points[i][2], points[j][1], points[j][2])
 
-
 print(points[0])
+
+for i in range(m):
+    for j in range(i+1, m):
+        node_travel_time[int(points[i][0])][int(points[j][0])] = distance(
+            points[i][1], points[i][2], points[j][1], points[j][2])
+        node_travel_time[int(points[j][0])][int(points[i][0])] = distance(
+            points[i][1], points[i][2], points[j][1], points[j][2])
+
+# for i in range(m):
+#     for j in range(i+1, m):
+#         node_travel_distance[int(points[i][0])][int(
+#             points[j][0])] = 1 / distance(points[i][1], points[i][2], points[j][1], points[j][2])
+#         node_travel_distance[int(points[j][0])][int(
+#             points[i][0])] = 1 / distance(points[i][1], points[i][2], points[j][1], points[j][2])
+
 
 
 # network = nx.from_numpy_array(np.matrix(adjMtrxDist))
@@ -79,41 +99,98 @@ fig.suptitle("Points")
 # return a map -> (location, drivers)
 # map of driver to path
 
-maxNodesInCluster = 20
-p = 1
+def find_path_cost(path):
+    if len(path) == 0:
+        return 0
+    temp_path = copy.deepcopy(path)
+    temp_path += [temp_path[0]]
+    path_sum = 0
+    for i in range(len(temp_path)-1):
+        path_sum += node_travel_time[temp_path[i]][temp_path[i+1]]
+    return path_sum
 
-low = 0
-high = 1
-while (high - low >= 0.001):
-	mid = (low + high)/2
-	men = float('inf')
-	for i in range(1):
-		print('calling solve')
-		temp, temp1, doneNodes = solve(n, m, adjMtrxDist, {}, nodeWeights, deliveryManWeight, i%10, mid, int(1.75*maxNodesInCluster-1))
-		print(temp1)
-		if(temp1 < men):
-			totalCost = temp1
-			men = temp1
-			locations = temp
 
-	mxPossibleIncludedNodes = min(n * int(1.75*maxNodesInCluster), m)
-	print(mxPossibleIncludedNodes, doneNodes, int(1.75*(maxNodesInCluster-1)))
-	assert(mxPossibleIncludedNodes >= doneNodes)
-	if (mxPossibleIncludedNodes > doneNodes):
-		low = mid
-	else:
-		high = mid
-		
+def find_loc(n, m, node_travel_distance, node_travel_time, node_weights, deliveryManWeight, positions):
+	clusters = markov_clusters(node_travel_distance, positions, False)
 
-p = mid
-men = float('inf')
-for i in range(10):
-	temp, temp1, doneNodes = solve(n, m, adjMtrxDist, {}, nodeWeights, deliveryManWeight, i%10, p, maxNodesInCluster-1)
-	print(temp1)
-	if(temp1 < men):
-		totalCost = temp1
-		men = temp1
-		locations = temp
+
+	print(clusters)
+
+	# starting_points = random.sample(range(1, m+1), n)
+	# locations, _ = find_path_for_all_drivers(n, m, node_travel_time, node_weights, deliveryManWeight, starting_points, 20)
+	clusters = clusters[1:]
+	for i in range(len(clusters)):
+		clusters[i] = list(clusters[i])
+
+
+	best_cost = infinity
+	best_locations = {}
+	for i in range(100):
+		locations, cost = find_travel_clusters(n, m, node_travel_time, copy.deepcopy(
+			clusters), node_weights, deliveryManWeight)
+
+		all_path_sum = 0
+		for loc in locations.values():
+			all_path_sum += find_path_cost(loc)
+
+		cost = max(cost, all_path_sum)
+
+		if cost < best_cost:
+			best_locations = locations
+			best_cost = cost
+
+	return best_locations, best_cost
+
+
+for i in range(m):
+    for j in range(i+1, m):
+        node_travel_distance[int(points[i][0])][int(
+            points[j][0])] = 1 / adjMtrxDist[int(points[i][0])][int(points[j][0])]
+        node_travel_distance[int(points[j][0])][int(
+            points[i][0])] = 1 / adjMtrxDist[int(points[j][0])][int(points[i][0])]
+
+r_locations, r_cost = find_loc(
+	n, m, node_travel_distance, node_travel_time, nodeWeights, deliveryManWeight, pos)
+
+# maxNodesInCluster = 20
+# p = 1
+
+# low = 0
+# high = 1
+# while (high - low >= 0.001):
+# 	mid = (low + high)/2
+# 	men = float('inf')
+# 	for i in range(1):
+# 		print('calling solve')
+# 		temp, temp1, doneNodes = solve(n, m, adjMtrxDist, {}, nodeWeights, deliveryManWeight, i%10, mid, int(1.75*maxNodesInCluster-1))
+# 		print(temp1)
+# 		if(temp1 < men):
+# 			totalCost = temp1
+# 			men = temp1
+# 			locations = temp
+
+# 	mxPossibleIncludedNodes = min(n * int(1.75*maxNodesInCluster), m)
+# 	print(mxPossibleIncludedNodes, doneNodes, int(1.75*(maxNodesInCluster-1)))
+# 	assert(mxPossibleIncludedNodes >= doneNodes)
+# 	if (mxPossibleIncludedNodes > doneNodes):
+# 		low = mid
+# 	else:
+# 		high = mid
+
+
+# p = mid
+# men = float('inf')
+# for i in range(10):
+# 	temp, temp1, doneNodes = solve(n, m, adjMtrxDist, {}, nodeWeights, deliveryManWeight, i%10, p, maxNodesInCluster-1)
+# 	print(temp1)
+# 	if(temp1 < men):
+# 		totalCost = temp1
+# 		men = temp1
+# 		locations = temp
+
+if (r_cost < infinity):
+	totalCost = r_cost
+	locations = r_locations
 
 print("Final Total Cost : ", totalCost)
 
@@ -164,7 +241,7 @@ for i in range(len(oriLocations[ix])-1):
 
 assert(idx != -1)
 locations[ix] = oriLocations[ix][:idx+1] + [m] + oriLocations[ix][idx+1:] 
-	
+
 # ------------------------
 
 print("locations", locations)
@@ -187,9 +264,8 @@ for p in range(1, m+1):
 
 for i in range(n):
 	for p in locations[i]:
-	   X[i].append(points[p-1][1])
-	   Y[i].append(points[p-1][2])
-	   
+		X[i].append(points[p-1][1])
+		Y[i].append(points[p-1][2])
 
 # print(locations)
 # ax.scatter(X1, Y1, color = 'black')

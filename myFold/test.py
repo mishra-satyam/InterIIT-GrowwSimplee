@@ -3,10 +3,9 @@ import copy
 
 def tsp(graph):
 	G = copy.deepcopy(graph)
-	assert(len(G) > 1)
 	if (len(G) == 1):
-		return [0, [(list(g.keys()))[0]]]
-	
+		return [0, [(list(G.keys()))[0], (list(G.keys()))[0]]]
+
 	newG = {}
 	nodes = set()
 	for i in G:
