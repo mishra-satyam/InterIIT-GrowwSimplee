@@ -11,7 +11,7 @@ import copy
 # deliveryManWeight - Bag weight
 # n - number of drivers
 
-def solve(drivers, nodes, adjMtrxDist, adjMtrxTimes, nodeWeights, deliveryManWeight, n):
+def solve(drivers, nodes, adjMtrxDist, adjMtrxTimes, nodeWeights, deliveryManWeight, n, p, maxNodesInCluster):
 	graph = {}
 	for i in range(nodes+1):
 		graph[i] = {}
@@ -46,8 +46,8 @@ def solve(drivers, nodes, adjMtrxDist, adjMtrxTimes, nodeWeights, deliveryManWei
 	clusterValues = [0 for i in range(drivers)]
 	clusterValuesSum = 0
 	newPoints = []
-	h =  (mexVal ** (1.5) / nodes)
-	print("H value is : ", h)
+	h =  2*mexVal*p
+	print("H value is : ", h, p)
 	
 	for i in points:
 		mx = float('inf')
@@ -57,7 +57,7 @@ def solve(drivers, nodes, adjMtrxDist, adjMtrxTimes, nodeWeights, deliveryManWei
 		mxGraph = {}
 		for l in range(5):
 			for j in range(drivers):
-				if (clusterWeightSum[j] + nodeWeights[i] > deliveryManWeight or len(clustersNodes[j]) > 20): continue
+				if (clusterWeightSum[j] + nodeWeights[i] > deliveryManWeight or len(clustersNodes[j]) > maxNodesInCluster): continue
 				newGraph = copy.deepcopy(clustersGraphs[j])
 				newGraph[i] = {}
 				for n in clustersNodes[j]:
@@ -106,7 +106,7 @@ def solve(drivers, nodes, adjMtrxDist, adjMtrxTimes, nodeWeights, deliveryManWei
 		mxGraph = {}
 		for l in range(5):
 			for j in range(drivers):
-				if (clusterWeightSum[j] + nodeWeights[i] > deliveryManWeight or len(clustersNodes[j]) > 20): continue
+				if (clusterWeightSum[j] + nodeWeights[i] > deliveryManWeight or len(clustersNodes[j]) > maxNodesInCluster): continue
 				newGraph = copy.deepcopy(clustersGraphs[j])
 				newGraph[i] = {}
 				for n in clustersNodes[j]:
@@ -176,4 +176,4 @@ def solve(drivers, nodes, adjMtrxDist, adjMtrxTimes, nodeWeights, deliveryManWei
 		ans[i] = path
 	# print("my length", len(ans))
 
-	return ans, totalCost
+	return ans, totalCost, nodesDone

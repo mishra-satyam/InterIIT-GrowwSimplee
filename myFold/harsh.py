@@ -78,13 +78,37 @@ fig.suptitle("Points")
 
 # return a map -> (location, drivers)
 # map of driver to path
-men = float('inf')
 
 maxNodesInCluster = 20
-mxPossibleIncludedNodes = min(n * maxNodesInCluster, m)
 p = 1
-for i in range(1):
-	temp, temp1, doneNodes = solve(n, m, adjMtrxDist, {}, nodeWeights, deliveryManWeight, i%10, p, int(1.75(maxNodesInCluster-1)))
+
+low = 0
+high = 1
+while (high - low >= 0.001):
+	mid = (low + high)/2
+	men = float('inf')
+	for i in range(1):
+		print('calling solve')
+		temp, temp1, doneNodes = solve(n, m, adjMtrxDist, {}, nodeWeights, deliveryManWeight, i%10, mid, int(1.75*maxNodesInCluster-1))
+		print(temp1)
+		if(temp1 < men):
+			totalCost = temp1
+			men = temp1
+			locations = temp
+
+	mxPossibleIncludedNodes = min(n * int(1.75*maxNodesInCluster), m)
+	print(mxPossibleIncludedNodes, doneNodes, int(1.75*(maxNodesInCluster-1)))
+	assert(mxPossibleIncludedNodes >= doneNodes)
+	if (mxPossibleIncludedNodes > doneNodes):
+		low = mid
+	else:
+		high = mid
+		
+
+p = mid
+men = float('inf')
+for i in range(10):
+	temp, temp1, doneNodes = solve(n, m, adjMtrxDist, {}, nodeWeights, deliveryManWeight, i%10, p, maxNodesInCluster-1)
 	print(temp1)
 	if(temp1 < men):
 		totalCost = temp1
@@ -139,13 +163,11 @@ for i in range(len(oriLocations[ix])-1):
 		idx = i
 
 assert(idx != -1)
-locations[ix] = oriLocations[ix][:idx+1] + [m] + oriLocations[idx+1:] 
+locations[ix] = oriLocations[ix][:idx+1] + [m] + oriLocations[ix][idx+1:] 
 	
 # ------------------------
 
 print("locations", locations)
-
-exit()
 
 X = []
 Y = []
