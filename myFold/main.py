@@ -14,7 +14,7 @@ import copy
 # Final Total Cost :  12012.661532082   h = 1.6
 
 
-def solve(drivers, nodes, adjMtrxDist, adjMtrxTimes, nodeWeights, deliveryManWeight, n):
+def solve(drivers, nodes, adjMtrxDist, adjMtrxTimes, nodeWeights, deliveryManWeight, n, p, maxNodesInCluster):
 	graph = {}
 	for i in range(nodes+1):
 		graph[i] = {}
@@ -49,8 +49,13 @@ def solve(drivers, nodes, adjMtrxDist, adjMtrxTimes, nodeWeights, deliveryManWei
 	clusterValues = [0 for i in range(drivers)]
 	clusterValuesSum = 0
 	newPoints = []
+<<<<<<< HEAD
 	h =  (mexVal ** (1.53) / nodes)
 	# print("H value is : ", h)
+=======
+	h =  2*mexVal*p
+	print("H value is : ", h, p)
+>>>>>>> 0d53c1843aaa581147461dac046aecb8d0179cb5
 	
 	for i in points:
 		mx = float('inf')
@@ -60,7 +65,7 @@ def solve(drivers, nodes, adjMtrxDist, adjMtrxTimes, nodeWeights, deliveryManWei
 		mxGraph = {}
 		for l in range(max(1, 200//nodes)):
 			for j in range(drivers):
-				if (clusterWeightSum[j] + nodeWeights[i] > deliveryManWeight or len(clustersNodes[j]) > 20): continue
+				if (clusterWeightSum[j] + nodeWeights[i] > deliveryManWeight or len(clustersNodes[j]) > maxNodesInCluster): continue
 				newGraph = copy.deepcopy(clustersGraphs[j])
 				newGraph[i] = {}
 				for n in clustersNodes[j]:
@@ -107,7 +112,7 @@ def solve(drivers, nodes, adjMtrxDist, adjMtrxTimes, nodeWeights, deliveryManWei
 		mxGraph = {}
 		for l in range(max(1, 200//nodes)):
 			for j in range(drivers):
-				if (clusterWeightSum[j] + nodeWeights[i] > deliveryManWeight or len(clustersNodes[j]) > 20): continue
+				if (clusterWeightSum[j] + nodeWeights[i] > deliveryManWeight or len(clustersNodes[j]) > maxNodesInCluster): continue
 				newGraph = copy.deepcopy(clustersGraphs[j])
 				newGraph[i] = {}
 				for n in clustersNodes[j]:
@@ -177,4 +182,4 @@ def solve(drivers, nodes, adjMtrxDist, adjMtrxTimes, nodeWeights, deliveryManWei
 		ans[i] = path
 	# print("my length", len(ans))
 
-	return ans, totalCost
+	return ans, totalCost, nodesDone

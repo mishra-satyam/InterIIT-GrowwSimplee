@@ -80,14 +80,42 @@ fig.suptitle("Points")
 
 # return a map -> (location, drivers)
 # map of driver to path
-locations, totalCost = solve(n, m, adjMtrxDist, {},nodeWeights, deliveryManWeight, 0)
-men = totalCost
 
 print("Number of itrs : ", 500//len(points))
 for i in range(500//len(points)):
 	start_time = time.time()
 	temp, temp1 = solve(n, m, adjMtrxDist, {},nodeWeights, deliveryManWeight, i%10)
 	print("Iteration #", i, " Cost : ", temp1, "Time : ", time.time() - start_time)
+p = 1
+
+low = 0
+high = 1
+while (high - low >= 0.001):
+	mid = (low + high)/2
+	men = float('inf')
+	for i in range(1):
+		print('calling solve')
+		temp, temp1, doneNodes = solve(n, m, adjMtrxDist, {}, nodeWeights, deliveryManWeight, i%10, mid, int(1.75*maxNodesInCluster-1))
+		print(temp1)
+		if(temp1 < men):
+			totalCost = temp1
+			men = temp1
+			locations = temp
+
+	mxPossibleIncludedNodes = min(n * int(1.75*maxNodesInCluster), m)
+	print(mxPossibleIncludedNodes, doneNodes, int(1.75*(maxNodesInCluster-1)))
+	assert(mxPossibleIncludedNodes >= doneNodes)
+	if (mxPossibleIncludedNodes > doneNodes):
+		low = mid
+	else:
+		high = mid
+		
+
+p = mid
+men = float('inf')
+for i in range(10):
+	temp, temp1, doneNodes = solve(n, m, adjMtrxDist, {}, nodeWeights, deliveryManWeight, i%10, p, maxNodesInCluster-1)
+	print(temp1)
 	if(temp1 < men):
 		totalCost = temp1
 		men = temp1
@@ -118,6 +146,8 @@ distances[m+1] = 0
 
 n = 3
 locations = {0: [4, 3, 5, 6, 27, 7, 8, 9, 10, 11, 12, 16, 17, 18, 22, 21, 19, 1], 1: [25, 28, 1, 26, 25], 2: [2, 23, 24, 20, 15, 14, 13, 1]}
+# -----------------
+
 oriLocations = copy.deepcopy(locations)
 # print("oriLocations", oriLocations)
 # locations, totalCost, adjMtrxDist, adjMtrxTimes, nodeWeights, m, points = pickup(n, locations, nodeWeights, adjMtrxDist, {}, m, newPoint, distances, {}, points)
@@ -157,16 +187,22 @@ for i in oriLocations:
 assert(ix != -1)
 
 idx = -1
-try:
-	idx = locations.index(oriLocations[ix][0])
-except:
-	myVeryPersonalVariable = None
-	
-if (idx != -1):
-	locations[ix] = oriLocations[ix][idx:] + oriLocations[ix][1:idx]
+mnVal = float('inf')
+for i in range(len(oriLocations[ix])-1):
+	x = oriLocations[ix][i]
+	y = oriLocations[ix][i+1]
+	val = -adjMtrxDist[x][y] + adjMtrxDist[x][m] + adjMtrxDist[m][y]
+	if (val < mnVal):
+		mnVal = val
+		idx = i
 
+assert(idx != -1)
+locations[ix] = oriLocations[ix][:idx+1] + [m] + oriLocations[ix][idx+1:] 
+	
+# ------------------------
 
 exit()
+print("locations", locations)
 
 X = []
 Y = []
