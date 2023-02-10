@@ -140,6 +140,8 @@ def find_path(clusters, prev_cluster, nodes, cap, node_travel_time, node_weights
     # print("Closest cluster", closest_cluster)
 
     if all_empty == len(clusters):
+        for i in range(len(glob_driver_completed)):
+            glob_driver_completed[i] = 1
         return []
 
     starting_point = random.choice(closest_cluster)

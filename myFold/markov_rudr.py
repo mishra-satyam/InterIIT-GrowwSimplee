@@ -4,6 +4,7 @@ from rudr import *
 
 
 def markov_clusters(node_travel_distance, positions, draw=False):
+    print("Called Markov algorithm")
     network = nx.from_numpy_array(np.matrix(node_travel_distance))
     print(node_travel_distance)
     print(network)
@@ -15,7 +16,7 @@ def markov_clusters(node_travel_distance, positions, draw=False):
 
     # perform clustering using different inflation values from 1.5 and 2.5
     # for each clustering run, calculate the modularity
-    for inflation in [i / 10 for i in range(11, 25)]:
+    for inflation in [i / 10 for i in range(11, 12)]:
         result = mc.run_mcl(matrix, inflation=inflation)
         clusters = mc.get_clusters(result)
         Q = mc.modularity(matrix=result, clusters=clusters)

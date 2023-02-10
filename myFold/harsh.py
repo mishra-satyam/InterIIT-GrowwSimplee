@@ -11,7 +11,7 @@ from markov_rudr import *
 from rudr import *
 
 
-f = open("moreLocations.in", "r")
+f = open("2000_30.in", "r")
 
 n = int(f.readline())
 m = int(f.readline())
@@ -125,7 +125,8 @@ def find_loc(n, m, node_travel_distance, node_travel_time, node_weights, deliver
 
 	best_cost = infinity
 	best_locations = {}
-	for i in range(100):
+	for i in range(1):
+		print("Current iteration -", i)
 		locations, cost = find_travel_clusters(n, m, node_travel_time, copy.deepcopy(
 			clusters), node_weights, deliveryManWeight)
 
@@ -246,7 +247,7 @@ men = totalCost
 ix = -1
 for i in oriLocations:
 	print("i: ", i, len(oriLocations[i]), len(locations[i]))
-	if(len(oriLocations[i])+1 != len(locations[i])) : 
+	if(len(oriLocations[i])+1 != len(locations[i])) :
 		ix = i
 		continue
 	locations[i] = oriLocations[i]
@@ -263,7 +264,7 @@ for i in range(len(oriLocations[ix])-1):
 		idx = i
 
 assert(idx != -1)
-locations[ix] = oriLocations[ix][:idx+1] + [m] + oriLocations[ix][idx+1:] 
+locations[ix] = oriLocations[ix][:idx+1] + [m] + oriLocations[ix][idx+1:]
 
 # ------------------------
 
@@ -310,7 +311,7 @@ for i in locations.keys():
 		plt.arrow(points[tmp[j-1]-1][1], points[tmp[j-1]-1][2], points[tmp[j]-1][1] - points[tmp[j-1]-1][1], points[tmp[j]-1][2] - points[tmp[j-1]-1][2])
 	print(i)
 	plt.scatter(X[i], Y[i])
-   
+
 plt.scatter(points[0][1], points[0][2], color = 'black')
 plt.show()
 
